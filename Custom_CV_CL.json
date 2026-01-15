@@ -1,0 +1,714 @@
+{
+  "name": "Custom CV/CL",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -32
+      ],
+      "id": "68fd83d2-08bd-4b6d-84e7-7cf5d51d537d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorId": {
+          "__rl": true,
+          "value": "TrtlecxAsNRbKl1na",
+          "mode": "list",
+          "cachedResultName": "💡 Indeed Jobs Scraper (valig/indeed-jobs-scraper)",
+          "cachedResultUrl": "https://console.apify.com/actors/TrtlecxAsNRbKl1na/input"
+        },
+        "customBody": "{\n  \"country\": \"us\",\n  \"limit\": 1000,\n  \"location\": \"Remote, USA\",\n  \"title\": \"Technical Support Engineer\"\n}"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -32
+      ],
+      "id": "a1cad565-54fe-4049-9916-306d3ddb1201",
+      "name": "Run Indeed Scrape and get data",
+      "credentials": {
+        "apifyApi": {
+          "id": "WuH4GVDdsrwaEQ44",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        272,
+        -32
+      ],
+      "id": "0ebb5210-a21c-4e75-8442-f960d4f9b856",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appOLXfjJVYLfk3zH",
+          "mode": "list",
+          "cachedResultName": "Job Listings",
+          "cachedResultUrl": "https://airtable.com/appOLXfjJVYLfk3zH"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblMRtU2kDi98Unf4",
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://airtable.com/appOLXfjJVYLfk3zH/tblMRtU2kDi98Unf4"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Loop Over Items').item.json.key }}",
+            "Company": "={{ $('Loop Over Items').item.json.employer.companyPageUrl }}",
+            "Role": "={{ $('Loop Over Items').item.json.title }}",
+            "Description": "={{ $('Loop Over Items').item.json.description.text }}",
+            "Job URL direct link": "={{ $('Loop Over Items').item.json.jobUrl }}",
+            "Quick Apply URL": "={{ $('Loop Over Items').item.json.url }}",
+            "id": "={{ $('Loop Over Items').item.json.key }}"
+          },
+          "matchingColumns": [
+            "id",
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Role",
+              "displayName": "Role",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job URL direct link",
+              "displayName": "Job URL direct link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Quick Apply URL",
+              "displayName": "Quick Apply URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Custom Resume",
+              "displayName": "Custom Resume",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Custom Coverletter",
+              "displayName": "Custom Coverletter",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1296,
+        -80
+      ],
+      "id": "e53cf82d-ad20-4efc-994b-0dcc58c00b74",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "sEKoGICHbv1FNAcH",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        640,
+        176
+      ],
+      "id": "b31c9b7b-9bb0-4388-87e9-10467ed4fbce",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "0rrLXc9KaAwKEXS0",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appOLXfjJVYLfk3zH",
+          "mode": "list",
+          "cachedResultName": "Job Listings",
+          "cachedResultUrl": "https://airtable.com/appOLXfjJVYLfk3zH"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblRwNB0yYVvw39Aj",
+          "mode": "list",
+          "cachedResultName": "Original Resume",
+          "cachedResultUrl": "https://airtable.com/appOLXfjJVYLfk3zH/tblRwNB0yYVvw39Aj"
+        },
+        "id": "recEVyJkaJVrIZSoi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        -64
+      ],
+      "id": "a28825d9-809a-4571-90e1-7cd2bfa819e7",
+      "name": "Get original HTML",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "sEKoGICHbv1FNAcH",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=##Overview\nI'm looking for jobs. Your task is to filter them based on a list of attributions and skills that I have. Some jobs may not be relevant, which is why I want you to go through each one of them and let me know whether or not I'm an OKAY fit. Be really lenient on the requirements though, because I am trying to get my resume out to a lot of places.\n\n##Context\nBelow is my resume\n{{ $('Get original HTML').item.json.Content }}\n\n##Job description:\n{{ $('Loop Over Items').item.json.description.text }}\n\n##Output\nRespond EXACTLY in this format. No \\n no slashes, no ```:\n\"true or false\"\n\nIf I'm a fit return true\nIf I'm not a fit return false",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        736,
+        -64
+      ],
+      "id": "1df2f194-92ff-4714-aa51-1c810a3b0f08",
+      "name": "Confirm Candidacy"
+    },
+    {
+      "parameters": {
+        "model": "gemma3:27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        144
+      ],
+      "id": "da40570d-edcb-4b17-a7e0-8fa8f12cd8f2",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "0rrLXc9KaAwKEXS0",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gemma3:27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        160
+      ],
+      "id": "0ed59a6d-90d1-473e-893d-f5474a4c725f",
+      "name": "Ollama Chat Model2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "0rrLXc9KaAwKEXS0",
+          "name": "Ollama account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=#OVERVIEW:\n\nYou are an expert coverletter writer, and write prose in beautiful conversational tone. I am needing you to write a coverletter based on the context information, with the output instructions being your source of truth for output, and the input being the main prompt.\n\n# CONTEXT:\n\nMy resume: {{ $('Get original HTML').item.json.Content }}\nJob Description: {{ $('Loop Over Items').item.json.description.text }}\n\n# OUTPUT:\n- Output a full, publish-ready cover letter about the content provided using the instructions.\n- Use absolutely ZERO cliches or jargon or journalistic language like \"In a world…\", etc.\n- Use absolutely ZERO M-DASHES!\n- Write in simple, plain, clear, and conversational style, not in a grandiose or academic style.\n- Do not use cliches or jargon.\n- Do not user m-dashes.\n- Do not include common setup language in any sentence, including: in conclusion, in closing, etc.\n- Do not output warnings or notes—just the output requested.\n- The cover letter should be a Minimum 250 words and a  maximum of 500 words.\n# INPUT:\nINPUT: # \nWrite a beatuifully hand written, human sounding coverletter from the information provided from my own resume, and the job description (simple words, rigorous logic, conversational tone).\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        1488,
+        -80
+      ],
+      "id": "05edbaf1-e61c-41b8-858f-11eefb86bf97",
+      "name": "Coverletter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a resume customization specialist. I will provide you with two inputs:\n\n1. My current resume in HTML format\n2. A job description for a position I'm applying to\n\nYour task is to analyze the job description and customize my resume to better align with the position while maintaining truthfulness. You should:\n\n- Reorder and emphasize relevant experiences that match the job requirements\n- Adjust skill descriptions to highlight competencies mentioned in the job posting\n- Modify the professional summary to align with the role\n- Use keywords and terminology from the job description naturally throughout\n- Preserve all factual information - do not fabricate experiences or skills\n- Maintain the overall HTML structure and styling\n\nOUTPUT REQUIREMENTS:\n- Provide ONLY the complete HTML document as your response\n- Do NOT wrap the HTML in code blocks or backticks\n- Do NOT include any explanatory text before or after the HTML\n- Start your response directly with <!DOCTYPE html> or <html>\n- End your response with </html>\n\nHere is my current resume:\n{{ $('Get original HTML').item.json.Content }}\n\nHere is the job description:\n{{ $('Loop Over Items').item.json.description.text }}\n\nGenerate the customized resume now.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        2256,
+        -80
+      ],
+      "id": "f9ee4dbb-a7cb-4d61-94bd-c94452c82205",
+      "name": "Resume",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1840,
+        -80
+      ],
+      "id": "4f497634-1ebd-4911-af96-4f9b2cbc21a8",
+      "name": "coverletter_txt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0f59c528-b68d-4694-8e52-42187b5c0769",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        -64
+      ],
+      "id": "61abb47d-56d7-43d1-b4a9-f6aea3ba5217",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2640,
+        -80
+      ],
+      "id": "097c3b94-a0ed-49ae-956c-9ee712910f59",
+      "name": "resume_html",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://content.airtable.com/v0/appOLXfjJVYLfk3zH/{{$('Create or update a record').item.json.id}}/Custom%20Coverletter/uploadAttachment",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={{ $('coverletter_txt').item.binary.data.data }}"
+            },
+            {
+              "name": "filename",
+              "value": "coverletter.txt"
+            },
+            {
+              "name": "contentType",
+              "value": "text/plain"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2048,
+        112
+      ],
+      "id": "89a1a53c-7f2d-48d4-8eb5-f8cf3cbdbdf5",
+      "name": "Send_Cl_Binary",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "sEKoGICHbv1FNAcH",
+          "name": "Airtable Personal Access Token account"
+        },
+        "httpBearerAuth": {
+          "id": "nzTRkwkA0nZNQFCk",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://content.airtable.com/v0/appOLXfjJVYLfk3zH/{{$('Create or update a record').item.json.id}}/Custom%20Resume/uploadAttachment",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={{ $('resume_html').item.binary.data.data }}"
+            },
+            {
+              "name": "filename",
+              "value": "resume.txt"
+            },
+            {
+              "name": "contentType",
+              "value": "text/plain"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2880,
+        176
+      ],
+      "id": "1a96a323-5962-4760-8aea-b13c4bc15ec4",
+      "name": "Send_Cl_Binary1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "sEKoGICHbv1FNAcH",
+          "name": "Airtable Personal Access Token account"
+        },
+        "httpBearerAuth": {
+          "id": "nzTRkwkA0nZNQFCk",
+          "name": "Bearer Auth account"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Run Indeed Scrape and get data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Indeed Scrape and get data": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get original HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "Coverletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Confirm Candidacy",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get original HTML": {
+      "main": [
+        [
+          {
+            "node": "Confirm Candidacy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Candidacy": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Coverletter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Resume",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Coverletter": {
+      "main": [
+        [
+          {
+            "node": "coverletter_txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume": {
+      "main": [
+        [
+          {
+            "node": "resume_html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "coverletter_txt": {
+      "main": [
+        [
+          {
+            "node": "Send_Cl_Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "resume_html": {
+      "main": [
+        [
+          {
+            "node": "Send_Cl_Binary1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send_Cl_Binary": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send_Cl_Binary1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cfbb0cb7-57ce-4aab-9ae1-b4e8834b9107",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d40bc4b3ba5ecd31826de8f3421e92c4cdc5a56824b6273f2b23cf26afec4746"
+  },
+  "id": "YC0brCnL5fmIGz0D",
+  "tags": []
+}
