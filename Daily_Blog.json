@@ -78,7 +78,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer db28efd62939ee98b1a958a9ec490ed0"
+              "value": "Bearer <your_token>"
             }
           ]
         },
@@ -175,7 +175,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer db28efd62939ee98b1a958a9ec490ed0"
+              "value": "Bearer <your_token>"
             }
           ]
         },
@@ -360,7 +360,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer jina_a6dca04af39a4961a70fbc402a3adadd4fdj5HyJgNTF59vYqo1TODeQ6GF6"
+              "value": "Bearer <your_token>"
             },
             {
               "name": "X-Return-Format",

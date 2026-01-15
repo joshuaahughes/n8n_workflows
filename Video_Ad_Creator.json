@@ -1,0 +1,678 @@
+{
+  "name": "Video Ad Creator",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "list",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Project",
+          "mode": "list"
+        },
+        "additionalOptions": {}
+      },
+      "id": "038fbf83-297d-4361-9789-223f08568fe0",
+      "name": "Get Project Inputs",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.Creative_Direction }}",
+        "options": {
+          "systemMessage": "You are a Creative Director AI. \nInput: Creative Direction and Element descriptions.\nTask: \n1. Generate a 5-scene breakdown for a cinematic commercial.\n2. Create a 'Music Prompt' for Suno.\n3. Write a 'Script' for the voiceover.\n4. For each scene, provide: 'Start Image Prompt', 'End Image Prompt', and 'Transition Prompt'.\n\nOutput strictly valid JSON format:\n{\n  \"music_prompt\": \"...\",\n  \"script\": \"...\",\n  \"scenes\": [\n    { \"scene_num\": 1, \"start_prompt\": \"...\", \"end_prompt\": \"...\", \"transition_prompt\": \"...\" },\n    ...\n  ]\n}"
+        }
+      },
+      "id": "4c663104-d85f-422b-b7ba-210f98d609e7",
+      "name": "AI Creative Director",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -656
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Project",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "id": "3b965129-e1a0-4820-abea-d8e3ed23b965",
+      "name": "Save Script & Music Prompt",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        768,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return JSON.parse($input.item.json.output).scenes.map(scene => {\n  return {\n    json: scene\n  }\n});"
+      },
+      "id": "f4bc1cc5-6588-463c-a292-daa1acff8c33",
+      "name": "Parse Scenes JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        976,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Scenes",
+          "mode": "list"
+        }
+      },
+      "id": "a3cf16c3-193b-415a-bf74-15f471920875",
+      "name": "Create Scenes in Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Scenes",
+          "mode": "list"
+        },
+        "additionalOptions": {}
+      },
+      "id": "cb7c5339-f82f-40e5-9bdb-67d3c6b2cfaa",
+      "name": "Get Scenes (Need Images)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/v1/image/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json['Start Prompt'] }}"
+            },
+            {
+              "name": "model",
+              "value": "nano-banana-pro"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7018e29e-5673-4660-9ad0-0c975c41d883",
+      "name": "Generate Start Image (Nano Banana)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        576,
+        -128
+      ],
+      "notes": "Replace URL/Auth with your specific provider (Kie.ai/Fal.ai/Replicate)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/v1/image/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json['End Prompt'] }}"
+            },
+            {
+              "name": "model",
+              "value": "nano-banana-pro"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b394097f-0c77-411e-a902-179fdd228782",
+      "name": "Generate End Image (Nano Banana)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        768,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Scenes",
+          "mode": "list"
+        },
+        "id": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "dc68e021-ebab-4086-8370-ef3cac51cac0",
+      "name": "Save Images to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        976,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Scenes",
+          "mode": "list"
+        },
+        "additionalOptions": {}
+      },
+      "id": "986485e7-00d0-4b04-8d6f-9543a801e93e",
+      "name": "Get Scenes (Need Videos)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        368,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/v1/video/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "start_image_url",
+              "value": "={{ $json['Start Image'] }}"
+            },
+            {
+              "name": "end_image_url",
+              "value": "={{ $json['End Image'] }}"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $json['Transition Prompt'] }}"
+            },
+            {
+              "name": "model",
+              "value": "vo3.1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7bf099d5-970e-48ff-bb50-78b0187ded57",
+      "name": "Generate Video (VO3.1)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        576,
+        80
+      ],
+      "notes": "Uses VO3.1 (Veo 3.1) via Kie.ai or similar provider."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Scenes",
+          "mode": "list"
+        },
+        "id": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "a1b026b7-0ac1-45dd-a8e9-7a232f10740e",
+      "name": "Save Video to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        768,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Project",
+          "mode": "list"
+        },
+        "additionalOptions": {}
+      },
+      "id": "258a0f1b-77cd-464d-9e5e-d535f7299e65",
+      "name": "Get Project (Music)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        368,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.suno.ai/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json['Music Prompt'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fa73ac52-ad95-415c-8aa4-4c981062a283",
+      "name": "Generate Music (Suno)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        576,
+        288
+      ],
+      "notes": "Replace with official Suno API endpoint."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Project",
+          "mode": "list"
+        },
+        "id": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "9b477da6-699a-477c-9efe-0ac3d61b312b",
+      "name": "Save Music",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        768,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Project",
+          "mode": "list"
+        },
+        "additionalOptions": {}
+      },
+      "id": "b8fb1b65-124b-4c54-9cb4-28f6a4132258",
+      "name": "Get Project (Voice)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        368,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json['Script'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2862e35d-8f3e-42af-9c5e-180d7f2be4d2",
+      "name": "Generate Voice (11Labs)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        576,
+        480
+      ],
+      "notes": "Requires ElevenLabs API Key."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "application": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "value": "Project",
+          "mode": "list"
+        },
+        "id": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "de988b84-3fb0-4070-95e2-bc21cd1bd5c8",
+      "name": "Save Voiceover",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        768,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        -320
+      ],
+      "id": "66eb1554-8fec-4d37-ac46-d207914eab4b",
+      "name": "Prompts"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        -128
+      ],
+      "id": "96169767-03e6-4570-aa14-c564864d5006",
+      "name": "Images"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        80
+      ],
+      "id": "8ff9ad19-16a1-48eb-aa31-090544909f68",
+      "name": "Videos"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        288
+      ],
+      "id": "f04732ec-ae2f-4715-b54a-a8f8a4127bb0",
+      "name": "Music"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        480
+      ],
+      "id": "d8a392aa-f7f2-4dc5-b944-05ac41cb956e",
+      "name": "Voice"
+    },
+    {
+      "parameters": {
+        "model": "gemma3:27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -432
+      ],
+      "id": "6e2a4056-65e7-40ef-8f3e-109c683f0c54",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "0rrLXc9KaAwKEXS0",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"image_prompt1\": \"\",\n\t\"image_prompt2\": \"\",\n  \t\"image_prompt1\": \"\",\n\t\"image_prompt2\": \"\",\n  \t\"image_prompt1\": \"\",\n\t\"image_prompt2\": \"\",\n  \t\"image_prompt1\": \"\",\n\t\"image_prompt2\": \"\",\n  \t\"image_prompt1\": \"\",\n\t\"image_prompt2\": \"\",\n  \t\"image_prompt1\": \"\",\n\t\"image_prompt2\": \"\",\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        -448
+      ],
+      "id": "1766019a-c69e-4e42-b937-588f3723945b",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {
+    "Videos": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      },
+      {
+        "json": {
+          "name": "Second item",
+          "code": 2
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Get Project Inputs": {
+      "main": [
+        [
+          {
+            "node": "AI Creative Director",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompts": {
+      "main": [
+        [
+          {
+            "node": "Get Project Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Images": {
+      "main": [
+        [
+          {
+            "node": "Get Scenes (Need Images)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Videos": {
+      "main": [
+        [
+          {
+            "node": "Get Scenes (Need Videos)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Music": {
+      "main": [
+        [
+          {
+            "node": "Get Project (Music)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Creative Director",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Creative Director",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2288d0ee-b3f5-4dda-8ea7-85cd821a3048",
+  "meta": {
+    "instanceId": "d40bc4b3ba5ecd31826de8f3421e92c4cdc5a56824b6273f2b23cf26afec4746"
+  },
+  "id": "g8xXZ1ag8gETsX6J",
+  "tags": []
+}
